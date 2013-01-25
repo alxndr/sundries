@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # todo add ruby, python, perl
-# todo add USERAGENT to anything else?
 
 if [[ $# -ne 1 ]]; then
   echo "Usage: $(basename $0) url"
@@ -36,7 +35,7 @@ elif [[ "$(is_available elinks)" ]]; then
   elinks -source "$1"
 elif [[ "$(is_available links)" ]]; then
   echo "using links" 1>&2
-  links -source "$1"
+  links -source "$1" -http.fake-user-agent="$USERAGENT"
 elif [[ "$(is_available lwp-download)" ]]; then
   echo "using lwp-download" 1>&2
   lwp-download "$1" -
