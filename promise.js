@@ -1,19 +1,21 @@
 var Promise = {
 
-  // Usage:
-  //
-  // promise = Object.create(Promise).new() \
-  //   .fill( 'anything', {goes:'here'} ) \
-  //   .bind( function(a){ console.log(a) } ) \
-  //   .fill( 'fulfill with new data' );
-  //
-  // Can also add data and/or callback during initialization:
-  //
-  // promise = Object.create(Promise).new({
-  //   data: ['anything else'], // an array of the arguments you'd pass to promise.fill()
-  //   callback: function(a){ console.log(a) }
-  // })
-  //
+  /* 
+
+    Usage:
+
+      promise = Object.create(Promise).new() \
+        .fill( 'anything', {goes:'here'} ) \
+        .bind( function(a){ console.log(a) } ) \
+        .fill( 'then fulfill with new data' );
+    
+    Can also add data and/or callback during initialization:
+    
+      promise = Object.create(Promise).new({
+        data: ['anything else'], // an array of the arguments you'd pass to promise.fill()
+        callback: function(a){ console.log(a) }
+      })
+  */
 
   new: function(opts) {
     this._initial_this = window.top;
@@ -38,8 +40,7 @@ var Promise = {
   },
 
   fill: function() {
-    this._data = Array.prototype.slice.call(arguments); // coerce arguments to a Real Array
-    // this._data = arguments // would rather do this though, and this.callback.call(this,this.data) or something
+    this._data = arguments
     this._tick();
     return this;
   },
@@ -51,24 +52,18 @@ var Promise = {
   // "private"
 
   _tick: function() {
-    // console.warn('tick');
     if (this._data && this._callback) {
-      // would rather not map
-      // we should only call callback once and pass in that arguments object
-      var callback = this._callback;
-      // console.warn('wanna call',callback,'with',this._data);
-      this._data.map(function(data) {
-        console.warn('actually calling',callback,'with',data);
-        callback.call(this._initial_this,data);
-      });
+      this._retval = this._callback(this._data);
     }
     return this;
   },
 
   // storage
 
-  _data: null,
-  _callback: null,
+  // _data: null,             // added with .fill()
+  // _callback: null,         // added with .bind()
+  // _retval: null,           // return value of callback when ran in _tick()
+  // _invalid_callback: null, // most recent non-function passed to .bind()
 
   // setters
   
@@ -83,8 +78,13 @@ var Promise = {
 
   // validation
 
-  _bind_valid: function(cb) {
-    return typeof cb === 'function';
+  _bind_valid: function(callback) {
+    var valid = typeof callback === 'function';
+    if (!valid) {
+      this._invalid_callback = callback;
+      console.error('invalid callback',callback);
+    }
+    return valid;
   }
 
 }
