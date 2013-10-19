@@ -4,7 +4,7 @@
   comment out the test suite (the describe() chunk at the end) if you want
 */
 
-_$ = function(name, methods_schema) {
+jasmine.getGlobal()['_$'] = function _$(name, methods_schema) {
   /*
     mock a jQuery object with Jasmine spies
     depends on jQuery as $()
@@ -38,8 +38,7 @@ _$ = function(name, methods_schema) {
   return $spy_obj;
 };
 
-
-stub_$init = function(stub_schema) {
+jasmine.getGlobal()['stub_$init'] = function stub_$init(stub_schema) {
   /*
     convenience function for stubbing jQuery.fn.init by mapping selectors to return values
     depends on _$()
@@ -47,6 +46,12 @@ stub_$init = function(stub_schema) {
     parameters:
     1) object describing the selectors to respond to, and the properties of the _$() objects that should be returned
        * passed straight to _$(), so key/value definitions are same as second parameter there
+
+    todo:
+    * kinda ugly: need to handle $(window) by saving schema to variable and assigning index, e.g.:
+      var schema = { 'selector':{data:1} };
+      schema[window] = {scroll:null};
+      stub_$init(schema);
   */
 
   spyOn($.fn, 'init').andCallFake(function(selector_init) {
