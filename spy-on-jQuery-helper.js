@@ -1,14 +1,16 @@
 /*
-  mock a jQuery object with Jasmine spies
-
-  because it should be a little more straightforward
-
   designed to be loaded up by Jasmine
   stick me in your spec/javascript/helpers/
-  comment out the test suite (the describe() chunk) if you want
+  comment out the test suite (the describe() chunk at the end) if you want
+*/
 
-  parameters:
+_$ = function(name, methods_schema) {
+  /*
+    mock a jQuery object with Jasmine spies
+    depends on jQuery as $()
+    check out test suite for example usage
 
+    parameters:
     1) name of your spy (gets passed straight to jasmine.createSpyObj() )
     2) object describing the methods to spy on:
        * keys are names of methods
@@ -16,11 +18,7 @@
          * use null as value to get the mocked jQuery object back (i.e. chaining)
          * use a function as value to have it called via .andCallFake()
          * use another _$() as value to mimic traversing (e.g. .find('.children') when selector doesn't matter to the test)
-
-  check out test suite for example usage
-*/
-
-function _$(name, methods_schema) {
+  */
   var $spy_obj = jasmine.createSpyObj(name, ['']);
   for (var key in methods_schema) {
     if (methods_schema.hasOwnProperty(key)) {
@@ -38,8 +36,30 @@ function _$(name, methods_schema) {
     }
   }
   return $spy_obj;
-}
+};
 
+
+stub_$init = function(stub_schema) {
+  /*
+    convenience function for stubbing jQuery.fn.init by mapping selectors to return values
+    depends on _$()
+
+    parameters:
+    1) object describing the selectors to respond to, and the properties of the _$() objects that should be returned
+       * passed straight to _$(), so key/value definitions are same as second parameter there
+  */
+
+  spyOn($.fn, 'init').andCallFake(function(selector_init) {
+    if (stub_schema.hasOwnProperty(selector_init)) {
+      return _$('mocked: ' + selector_init, stub_schema[selector_init]);
+    } else if (selector_init == '#jasmine-fixtures') {
+      return _$('mocked #jasmine-fixtures', {remove:undefined});
+    }
+    return _$('default mocked jQuery selector');
+  });
+};
+
+/*
 describe('Jasmine helpers', function() {
   describe('_$()', function() {
 
@@ -111,4 +131,30 @@ describe('Jasmine helpers', function() {
     });
 
   });
+
+  describe('stub_$init()', function() {
+    it('should spy on $.fn.init', function() {
+      spyOn(window, 'spyOn').andCallThrough();
+
+      stub_$init({foo:'bar'});
+
+      expect(window.spyOn).toHaveBeenCalledWith($.fn, 'init');
+    });
+    it('should accept schema mapping selectors to _$() method schemas', function() {
+      stub_$init({ 'some selector': {baz:'qux'} });
+
+      expect($('some selector').baz()).toEqual('qux');
+    });
+    it('should automatically handle #jasmine-fixtures', function() {
+      stub_$init({});
+
+      expect($('#jasmine-fixtures')).toBeTruthy();
+    });
+    it('should have a default', function() {
+      stub_$init({});
+
+      expect($('foo')).toBeTruthy();
+    });
+  });
 });
+*/
