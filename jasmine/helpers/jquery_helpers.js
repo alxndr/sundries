@@ -4,7 +4,7 @@
   comment out the test suite (the describe() chunk at the end) if you want
 */
 
-jasmine.getGlobal()['_$'] = function _$(name, methods_schema) {
+var _$ = function _$(name, methods_schema) {
   /*
     mock a jQuery object with Jasmine spies
     depends on jQuery as $()
@@ -37,8 +37,9 @@ jasmine.getGlobal()['_$'] = function _$(name, methods_schema) {
   }
   return $spy_obj;
 };
+jasmine.getGlobal()['_$'] = _$;
 
-jasmine.getGlobal()['stub_$init'] = function stub_$init(stub_schema) {
+var stub_$init = function stub_$init(stub_schema) {
   /*
     convenience function for stubbing jQuery.fn.init by mapping selectors to return values
     depends on _$()
@@ -52,10 +53,12 @@ jasmine.getGlobal()['stub_$init'] = function stub_$init(stub_schema) {
       var schema = { 'selector':{data:1} };
       schema[window] = {scroll:null};
       stub_$init(schema);
+    * idempotence (to allow calls in nested describe()s)
   */
 
   spyOn($.fn, 'init').andCallFake(function(selector_init) {
     if (stub_schema.hasOwnProperty(selector_init)) {
+      // todo - detect non-schema and return it
       return _$('mocked: ' + selector_init, stub_schema[selector_init]);
     } else if (selector_init == '#jasmine-fixtures') {
       return _$('mocked #jasmine-fixtures', {remove:undefined});
@@ -63,6 +66,7 @@ jasmine.getGlobal()['stub_$init'] = function stub_$init(stub_schema) {
     return _$('default mocked jQuery selector');
   });
 };
+jasmine.getGlobal()['stub_$init'] = stub_$init;
 
 /*
 describe('Jasmine helpers', function() {
@@ -121,12 +125,8 @@ describe('Jasmine helpers', function() {
       });
 
       it('should allow nesting', function() {
-        var _$child = _$('span', {
-          show: null
-        });
-        var _$parent = _$('div', {
-          find: _$child
-        });
+        var _$child = _$('span', { show: null });
+        var _$parent = _$('div', { find: _$child });
 
         _$parent.find('foo').show();
 
