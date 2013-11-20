@@ -9,7 +9,7 @@ beforeEach(function() {
 describe('Jasmine matchers', function() {
   describe('toHaveOwnProperty', function() {
     it('should look at hasOwnProperty', function() {
-      var obj = { foo: 'bar', baz: function (){} };
+      var obj = { foo: 'bar', baz: function(){} };
 
       expect(obj).toHaveOwnProperty('foo');
       expect(obj).toHaveOwnProperty('baz');
@@ -18,4 +18,3 @@ describe('Jasmine matchers', function() {
     });
   });
 });
-
