@@ -1,4 +1,16 @@
 jasmine.getGlobal()['setupAndTeardown'] = function setupAndTeardown(obj, name, value) {
+  /*
+    convenience function for creating a namespaced object before an example or suite, and removing it afterwards
+
+    parameters:
+    1) (object) namespace object, e.g. window.console
+    2) (string) name of object to attach to namespace object, e.g. 'log'
+    3) (any) rvalue of new namespaced object, e.g. function(){}
+
+    todo:
+    * make usable in top-level describe() block
+  */
+
   beforeEach(function() {
     obj[name] = value;
   });

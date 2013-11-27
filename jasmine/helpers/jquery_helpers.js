@@ -60,12 +60,15 @@ var stub_$init = function stub_$init(stub_schema) {
     parameters:
     1) object describing the selectors to respond to, and the properties of the _$() objects that should be returned
        * passed straight to _$(), so key/value definitions are same as second parameter there
+       * selectors will be handled as strings; see note below for stubbing objects like $(document) or $(window)
 
-    todo:
-    * kinda ugly: need to handle $(window) by saving schema to variable and assigning index, e.g.:
+    note: need to handle $(window) by saving stub_$init()'s schema to variable and assigning to window as an index, e.g.:
       var schema = { 'selector':{data:1} };
       schema[window] = {scroll:null};
       stub_$init(schema);
+
+    todo:
+    * make a nicer way to handle non-string selectors like $(window)
     * idempotence (to allow calls in nested describe()s)
   */
 
