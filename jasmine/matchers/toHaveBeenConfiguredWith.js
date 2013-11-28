@@ -28,12 +28,7 @@ beforeEach(function() {
 
         return [normal_message, not_message];
       };
-      return config_object.hasOwnProperty(config_key)
-        && (
-          (typeof config_value.jasmineMatches == 'function' && config_value.jasmineMatches(config_object[config_key]))
-          ||
-          config_object[config_key] == config_value
-        );
+      return config_object.hasOwnProperty(config_key) && ( (typeof config_value.jasmineMatches == 'function' && config_value.jasmineMatches(config_object[config_key])) || config_object[config_key] == config_value);
     }
   });
 });

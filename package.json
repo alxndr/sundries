@@ -1,0 +1,9 @@
+{
+  "name": "jasmine-helpers",
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-jshint": "~0.7.2",
+    "grunt-contrib-jasmine": "",
+    "grunt-contrib-watch": "~0.5.3"
+  }
+}

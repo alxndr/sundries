@@ -3,7 +3,7 @@
  stick me in your spec/javascript/helpers/
 */
 
-var _$ = function _$(_name, methods_schema, properties_schema) {
+jasmine.getGlobal()._$ = function _$(_name, methods_schema, properties_schema) {
   /*
     mock a jQuery object with Jasmine spies
     depends on jQuery as $()
@@ -21,6 +21,9 @@ var _$ = function _$(_name, methods_schema, properties_schema) {
        * keys are names of properties
        * values are property values
        * default: { length: true }
+
+    todo:
+    * try replacing __is_br_mock__ hack w/storing mock_objs
   */
   var mock_obj = {
     length: true,
@@ -50,9 +53,8 @@ var _$ = function _$(_name, methods_schema, properties_schema) {
   }
   return mock_obj;
 };
-jasmine.getGlobal()['_$'] = _$;
 
-var stub_$init = function stub_$init(stub_schema) {
+jasmine.getGlobal().stub_$init = function stub_$init(stub_schema) {
   /*
     convenience function for stubbing jQuery.fn.init by mapping selectors to return values
     depends on _$()
@@ -84,7 +86,6 @@ var stub_$init = function stub_$init(stub_schema) {
     return _$('default mocked jQuery selector');
   });
 };
-jasmine.getGlobal()['stub_$init'] = stub_$init;
 
 describe('Jasmine helpers', function() {
   describe('_$()', function() {
@@ -151,7 +152,7 @@ describe('Jasmine helpers', function() {
 
       xit('respects own properties', function() {
         // todo - hasOwnProperty()
-      })
+      });
 
     });
 
