@@ -2,11 +2,11 @@
  Array#unique
  */
 Array.prototype.unique = function() {
-  return this.reduce(function(prev_val, current_val) {
-    if (prev_val.indexOf(current_val) < 0) {
-      prev_val.push(current_val);
+  return this.reduce(function(uniques, current_val) {
+    if (uniques.indexOf(current_val) < 0) {
+      uniques.push(current_val);
     }
-    return prev_val;
+    return uniques;
   }, []);
 };
 
@@ -30,7 +30,8 @@ Array.prototype.random = function() {
 };
 
 /*
-  like ruby's Object#tap
+  Object#tap
+  like ruby's
 */
 Object.prototype.tap = function(cb) {
   cb(this);
