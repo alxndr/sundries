@@ -43,4 +43,26 @@ Object.prototype.tap = function(cb) {
 */
 Object.prototype.try = function(code_str) {
   return eval(code_str);
-}
+};
+
+/*
+  String#repeat
+  'foo'.repeat(2) == 'foofoo'
+
+  from http://jsperf.com/faster-string-repeat/12
+  */
+String.prototype.repeat = function(count) {
+  if (count < 1) {
+    return '';
+  }
+  var result = '',
+    pattern = this.valueOf();
+  while (count > 0) {
+    if (count & 1) {
+      result += pattern;
+    }
+    count >>= 1;
+    pattern += pattern;
+  }
+  return result;
+};
