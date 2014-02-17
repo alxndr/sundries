@@ -4,6 +4,7 @@
   * examples, uses
 * explain hoisting
   * have you encountered it?
+* thoughts on preprocessors
 
 # css
 
@@ -19,4 +20,5 @@
   * inner shadow
   * animation
   * ...
+* thoughts on preprocessors
 
