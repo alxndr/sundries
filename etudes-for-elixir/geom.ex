@@ -14,4 +14,6 @@ defmodule Geom do
     :math.pi * a * b
   end
 
+  def area(_atom, _a, _b), do: 0
+
 end
