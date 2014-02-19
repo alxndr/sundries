@@ -1,9 +1,16 @@
+# general
+
+* how's it going? having any fun today?
+* how do you keep current or learn/hear about new stuff? blogs, podcasts, books, conferences...
+
+
 # js
 
 * describe a closure
   * examples, uses
 * explain hoisting
   * have you encountered it?
+
 
 # css
 
@@ -20,3 +27,6 @@
   * animation
   * ...
 
+# html
+
+* ...
