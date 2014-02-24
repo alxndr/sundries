@@ -30,19 +30,22 @@ Array.prototype.random = function() {
 };
 
 /*
+ * Array#partition
+ */
+Array.prototype.partition = function(cb) {
+  return this.reduce(function(results, elem) {
+    results[cb(elem) ? 'true' : 'false'].push(elem);
+    return results;
+  }, {true:[],false:[]});
+};
+
+/*
   Object#tap
   like ruby's
 */
 Object.prototype.tap = function(cb) {
   cb(this);
   return this;
-}
-
-/*
-  i forget what this was for
-*/
-Object.prototype.try = function(code_str) {
-  return eval(code_str);
 };
 
 /*
