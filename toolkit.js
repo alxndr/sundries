@@ -1,13 +1,18 @@
 /*
- Array#unique
+ * Array#partition
  */
-Array.prototype.unique = function() {
-  return this.reduce(function(uniques, current_val) {
-    if (uniques.indexOf(current_val) < 0) {
-      uniques.push(current_val);
-    }
-    return uniques;
-  }, []);
+Array.prototype.partition = function(cb) {
+  return this.reduce(function(results, elem) {
+    results[cb(elem) ? 'true' : 'false'].push(elem);
+    return results;
+  }, {true:[],false:[]});
+};
+
+/*
+  Array#random
+ */
+Array.prototype.random = function() {
+  return this[ Math.floor(Math.random() * this.length) ];
 };
 
 /*
@@ -23,20 +28,15 @@ Array.prototype.times_do = function(callback) {
 };
 
 /*
-  Array#random
+ Array#unique
  */
-Array.prototype.random = function() {
-  return this[ Math.floor(Math.random() * this.length) ];
-};
-
-/*
- * Array#partition
- */
-Array.prototype.partition = function(cb) {
-  return this.reduce(function(results, elem) {
-    results[cb(elem) ? 'true' : 'false'].push(elem);
-    return results;
-  }, {true:[],false:[]});
+Array.prototype.unique = function() {
+  return this.reduce(function(uniques, current_val) {
+    if (uniques.indexOf(current_val) < 0) {
+      uniques.push(current_val);
+    }
+    return uniques;
+  }, []);
 };
 
 /*
