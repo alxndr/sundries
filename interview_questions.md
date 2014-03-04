@@ -12,6 +12,8 @@
 * explain hoisting
   * have you encountered it?
 * thoughts on preprocessors
+* favorite debugging tool
+  * Timeline or Profiles tab in Chrome dev tools?
 
 
 # css
