@@ -3,7 +3,7 @@
  stick me in your spec/javascript/helpers/
 */
 
-jasmine.getGlobal()._$ = function _$(_name, methods_schema, properties_schema) {
+function _$(_name, methods_schema, properties_schema) {
   /*
     mock a jQuery object with Jasmine spies
     depends on jQuery as $()
@@ -20,15 +20,15 @@ jasmine.getGlobal()._$ = function _$(_name, methods_schema, properties_schema) {
     3) object describing properties the spy should have [optional]:
        * keys are names of properties
        * values are property values
-       * default: { length: true }
+         * default: { length: true }
 
     todo:
-    * try replacing __is_br_mock__ hack w/storing mock_objs
+    * rename to "mock_jQuery_selector" or something
   */
-  var mock_obj = {
-    length: true,
-    __is_br_mock__: true // minor violation of our little api but that's what the underscores are for
-  };
+  var mock_obj = { length: true };
+
+  Object.defineProperty(mock_obj, '_is_mock', { value: true, enumerable: false });
+
   for (var method_name in methods_schema) {
     if (!methods_schema.hasOwnProperty(method_name)) {
       continue;
@@ -52,42 +52,59 @@ jasmine.getGlobal()._$ = function _$(_name, methods_schema, properties_schema) {
     mock_obj[property_name] = properties_schema[property_name];
   }
   return mock_obj;
-};
+}
 
-jasmine.getGlobal().stub_$init = function stub_$init(stub_schema) {
+function make_$_stubber(stub_schema) {
   /*
-    convenience function for stubbing jQuery.fn.init by mapping selectors to return values
-    depends on _$()
+    this returns a function to be passed to .andCallFake() on an existing spy.
+    return values of the fake call are mapped to the first argument of the fake call.
+    the mapping is specified in stub_schema.
+
+    depends on: _$()
+
+    primary use cases:
+
+    * spyOn($.fn, 'init').andCallFake(make_$_stubber({ '#foo' : {hasClass:true} }));
+      // $('#foo').hasClass() => true
+
+    * spyOn(some_view.prototype, '$').andCallFake(make_$_stubber({ '#foo' : {hasClass:true} }));
+      // some_view.$('#foo').hasClass() => true
 
     parameters:
     1) object describing the selectors to respond to, and the properties of the _$() objects that should be returned
        * passed straight to _$(), so key/value definitions are same as second parameter there
        * selectors will be handled as strings; see note below for stubbing objects like $(document) or $(window)
 
-    note: need to handle $(window) by saving stub_$init()'s schema to variable and assigning to window as an index, e.g.:
+    note: need to handle $(window) by saving the schema to a variable and assigning to window as an index before calling make_$_stubber, e.g.:
       var schema = { 'selector':{data:1} };
       schema[window] = {scroll:null};
-      stub_$init(schema);
+      spyOn($.fn, 'init').andCallFake(make_$_stubber(schema));
 
     todo:
-    * make a nicer way to handle non-string selectors like $(window)
-    * idempotence (to allow calls in nested describe()s)
+      * make a nicer way to handle non-string selectors like $(window)
+      * idempotence (to allow calls in nested describe()s)
   */
-
-  spyOn($.fn, 'init').andCallFake(function(selector_init) {
+  return function(selector_init) {
     if (stub_schema.hasOwnProperty(selector_init)) {
-      if (stub_schema[selector_init].__is_br_mock__) {
+      if (stub_schema[selector_init]._is_mock) {
         return stub_schema[selector_init];
       }
       return _$('mocked: ' + selector_init, stub_schema[selector_init]);
-    } else if (selector_init == '#jasmine-fixtures') {
-      return _$('mocked #jasmine-fixtures', {remove: undefined});
+    }
+    if (selector_init == '#jasmine-fixtures') {
+      return _$('mocked #jasmine-fixtures', {remove:undefined});
     }
     return _$('default mocked jQuery selector');
-  });
-};
+  };
+}
 
-describe('Jasmine helpers', function() {
+var jasmine_scope = jasmine.getGlobal();
+if (jasmine_scope) {
+  jasmine_scope._$ = _$;
+  jasmine_scope.make_$_stubber = make_$_stubber;
+}
+
+describe('Jasmine jQuery helpers', function() {
   describe('_$()', function() {
 
     describe('method definitions', function() {
@@ -103,9 +120,7 @@ describe('Jasmine helpers', function() {
       });
 
       it('should call a passed function', function() {
-        var return_bar = function() {
-          return 'bar';
-        };
+        var return_bar = function() { return 'bar'; };
         var _$mock = _$('obj', {
           foo: return_bar
         });
@@ -125,13 +140,10 @@ describe('Jasmine helpers', function() {
       });
 
       it('should permit a mixture of method definitions', function() {
-        var return_bar = function() {
-          return 'bar';
-        };
         var _$mock = _$('obj', {
           show: null,
           text: 'foo',
-          each: return_bar
+          each: function(){ return 'bar'; }
         });
 
         _$mock.show();
@@ -158,7 +170,7 @@ describe('Jasmine helpers', function() {
 
     describe('property definitions', function() {
 
-      it('should default to .length == true (plus mock flag)', function() {
+      it('should default to only .length == true', function() {
         var _$mock_obj = _$('foo');
 
         var keys = [], values = [];
@@ -169,8 +181,8 @@ describe('Jasmine helpers', function() {
           }
         }
 
-        expect(keys).toEqual(['length', '__is_br_mock__']);
-        expect(values).toEqual([true, true]);
+        expect(keys).toEqual(['length']);
+        expect(values).toEqual([true]);
       });
 
       it('should return passed values', function() {
@@ -189,28 +201,34 @@ describe('Jasmine helpers', function() {
     });
   });
 
-  describe('stub_$init()', function() {
-    it('should spy on $.fn.init', function() {
-      spyOn(window, 'spyOn').andCallThrough();
-
-      stub_$init({foo: 'bar'});
-
-      expect(window.spyOn).toHaveBeenCalledWith($.fn, 'init');
-    });
+  describe('make_$_stubber()', function() {
     it('should accept schema mapping selectors to _$() method schemas', function() {
-      stub_$init({ 'some selector': {baz: 'qux'} });
+      spyOn($.fn, 'init').andCallFake(make_$_stubber({ 'some selector': {baz:'qux'} }));
 
       expect($('some selector').baz()).toEqual('qux');
     });
     it('should automatically handle #jasmine-fixtures', function() {
-      stub_$init({});
+      spyOn($.fn, 'init').andCallFake(make_$_stubber({}));
 
       expect($('#jasmine-fixtures')).toBeTruthy();
     });
     it('should have a default', function() {
-      stub_$init({});
+      spyOn($.fn, 'init').andCallFake(make_$_stubber({}));
 
       expect($('foo')).toBeTruthy();
+    });
+
+    describe('when given 2nd & 3rd params', function() {
+      it('should spy on that', function() {
+        var a_view = { '$': function() { throw new Error('I should be overridden'); } };
+
+        spyOn(a_view, '$').andCallFake(make_$_stubber({selector:{foo:'bar'}}));
+
+        expect(a_view.$().length).toBeTruthy();
+        expect(a_view.$('').length).toBeTruthy();
+        expect(a_view.$('selector').length).toBeTruthy();
+        expect(a_view.$('selector').foo()).toEqual('bar');
+      });
     });
   });
 });
