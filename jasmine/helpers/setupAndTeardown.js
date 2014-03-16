@@ -1,4 +1,4 @@
-jasmine.getGlobal().setupAndTeardown = function setupAndTeardown(obj, name, value) {
+function setupAndTeardown(obj, name, value) {
   /*
     convenience function for creating a namespaced object before an example or suite, and removing it afterwards
 
@@ -7,14 +7,18 @@ jasmine.getGlobal().setupAndTeardown = function setupAndTeardown(obj, name, valu
     2) (string) name of object to attach to namespace object, e.g. 'log'
     3) (any) rvalue of new namespaced object, e.g. function(){}
   */
-
   beforeEach(function() {
     obj[name] = value;
   });
   afterEach(function() {
     delete(obj[name]);
   });
-};
+}
+
+var jasmine_scope = jasmine.getGlobal();
+if (jasmine_scope) {
+  jasmine_scope.setupAndTeardown = setupAndTeardown;
+}
 
 var namespace = {};
 describe('setupAndTeardown()', function() {
