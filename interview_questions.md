@@ -3,6 +3,7 @@
 * how's it going? having any fun today?
 * how do you keep current or learn/hear about new stuff? blogs, podcasts, books, conferences...
 * thoughts on comments in code
+* code test/review/release process you've done?
 
 
 # js
