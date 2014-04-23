@@ -37,3 +37,12 @@
 # html
 
 * ...
+
+
+# on doing frontend stuff
+
+* recognizing invalid syntax w/o editor
+* recognizing patterns and ways to abstract
+* mentally tracking state while looking at code
+* being able to get into complex state to debug
+
