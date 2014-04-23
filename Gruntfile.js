@@ -5,6 +5,7 @@ module.exports = function(grunt) {
     jshint: {
       all: ['Gruntfile.js', 'jasmine/**/*js'],
       options: {
+        '-W051': 'ignores variable deletion warning',
         '-W014': 'ignores "Bad line breaking" errors, for comma-first style',
         ignores: ['jasmine/support/*.js']
       }
