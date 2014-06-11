@@ -8,26 +8,22 @@ class FakeBritishToponym < String
 
   def initialize(**args)
     args[:modifier] = true unless args.has_key? :modifier
-    args[:min_syllables] = 2 unless args.has_key? :min_syllables
+    args[:min_syllables] ||= 2
 
-    @pieces = [random_prefix.capitalize]
+    @pieces = []
+
+    add_prefix
 
     rand(args[:min_syllables]).times do
-      @pieces.push pick_infix
+      add_infix
     end
 
     if @pieces.length == 1 || rand(10) % 3 == 0
-      pick = random_suffix
-      double_last_letter_if_needed(pick)
-      @pieces.push pick
+      add_suffix
     end
 
     if args[:modifier] && rand(10) % 5 == 0
-      if rand(2) == 0
-        add_antefix
-      else
-        add_postfix
-      end
+      add_decoration
     end
 
     @name = @pieces.join.to_s
@@ -45,20 +41,40 @@ class FakeBritishToponym < String
     @pieces.unshift random_antefix.capitalize+' '
   end
 
+  def add_prefix
+    @pieces.push random_prefix.capitalize
+  end
+
+  def add_infix
+    @pieces.push pick_infix
+  end
+
+  def add_suffix
+    @pieces.push pick_suffix
+  end
+
   def add_postfix
     # this sure sucks
     pick = random_postfix
-    if pick.match(/^-/)
+    if pick.match(/^-/) # "-on-the-", "-upon-", etc
       @pieces.push pick
       @pieces.push self.class.new(modifier: false)
     elsif pick == 'of'
-      @pieces.push ' '+pick+' '
+      @pieces.push " #{pick} "
       @pieces.push self.class.new(modifier: false)
     elsif pick == "'s"
-      @pieces.push pick+' '
+      @pieces.push "#{pick} "
       @pieces.push self.class.new(modifier: false)
     else
       @pieces.push ' '+pick.capitalize
+    end
+  end
+
+  def add_decoration
+    if rand(2) == 0
+      add_antefix
+    else
+      add_postfix
     end
   end
 
@@ -66,6 +82,12 @@ class FakeBritishToponym < String
     begin
       pick = random_infix
     end while pick == @pieces.last # try not to double up syllables
+    double_last_letter_if_needed(pick)
+    pick
+  end
+
+  def pick_suffix
+    pick = random_suffix
     double_last_letter_if_needed(pick)
     pick
   end
