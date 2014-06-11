@@ -6,18 +6,14 @@ class FakeBritishToponym < String
   SUFFIXES  = %w( bie borough bost born burgh bury bridge by carden cay chester church combe dale deen den don dun ey field firth fork forth frith garth gate head holm hop hurst inge keld lan land law leigh ley low minster moth mouth orth over pool rith rock sbury set shaw shep ship shire stead ster stone ter thorp tham thwait tyne well wich wold wick )
   POSTFIXES = %w( bight castle crossing downs gate glen grove hall hamlet -in- marsh of -on- -on-the- river 's sands town -under- -upon- village water willow )
 
-  def initialize(opts={})
-    opts[:modifier] = true unless opts.has_key? :modifier
-    opts[:min_syllables] = 2 unless opts.has_key? :min_syllables
+  def initialize(**args)
+    args[:modifier] = true unless args.has_key? :modifier
+    args[:min_syllables] = 2 unless args.has_key? :min_syllables
 
     @pieces = [random_prefix.capitalize]
 
-    rand(opts[:min_syllables]).times do
-      begin
-        pick = random_infix
-      end while pick == @pieces.last # try not to double up syllables
-      double_last_letter_if_needed(pick)
-      @pieces.push pick
+    rand(args[:min_syllables]).times do
+      @pieces.push pick_infix
     end
 
     if @pieces.length == 1 || rand(10) % 3 == 0
@@ -26,7 +22,7 @@ class FakeBritishToponym < String
       @pieces.push pick
     end
 
-    if opts[:modifier] && rand(10) % 5 == 0
+    if args[:modifier] && rand(10) % 5 == 0
       if rand(2) == 0
         add_antefix
       else
@@ -36,7 +32,7 @@ class FakeBritishToponym < String
 
     @name = @pieces.join.to_s
 
-    super @name
+    super @name # do some String-y things
   end
 
   def to_str
@@ -50,6 +46,7 @@ class FakeBritishToponym < String
   end
 
   def add_postfix
+    # this sure sucks
     pick = random_postfix
     if pick.match(/^-/)
       @pieces.push pick
@@ -65,6 +62,14 @@ class FakeBritishToponym < String
     end
   end
 
+  def pick_infix
+    begin
+      pick = random_infix
+    end while pick == @pieces.last # try not to double up syllables
+    double_last_letter_if_needed(pick)
+    pick
+  end
+
   %w(ante pre in suf post).each do |which|
     define_method("random_#{which}fix") do
       corpus = eval "#{which}fixes".upcase
@@ -73,6 +78,7 @@ class FakeBritishToponym < String
   end
 
   def double_last_letter_if_needed(pick)
+    # obviously this should be just two things
     return unless pick.match(/^[aeiou]/)
     return if @pieces.last.match(/^[aeiou]/)
     return if @pieces.last[-1] == @pieces.last[-2] # don't triple
