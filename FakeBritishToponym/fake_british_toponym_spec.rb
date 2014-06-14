@@ -1,12 +1,13 @@
 require File.dirname(__FILE__) + '/fake_british_toponym'
 
-MANY = 999
+MANY = 10e3.to_i
 
 describe FakeBritishToponym do
 
   it 'should be a string' do
     expect(subject).to be_a String
   end
+
 
   describe 'options' do
 
@@ -18,6 +19,15 @@ describe FakeBritishToponym do
             expect(toponym).to_not include ' '
             expect(toponym).to_not include '-'
             expect(toponym).to_not include "'"
+          end
+        end
+      end
+
+      it 'should not contain obvious errors' do
+        MANY.times do
+          toponym = FakeBritishToponym.new(modifier: true)
+          [' -', '- ', " '", "' "].each do |bad_char_sequence|
+            expect(toponym).not_to include bad_char_sequence
           end
         end
       end
