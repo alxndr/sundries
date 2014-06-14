@@ -82,13 +82,13 @@ class FakeBritishToponym < String
     begin
       pick = random_infix
     end while pick == @pieces.last # try not to double up syllables
-    double_last_letter_if_needed(pick)
+    double_last_letter_if_needed pick
     pick
   end
 
   def pick_suffix
     pick = random_suffix
-    double_last_letter_if_needed(pick)
+    double_last_letter_if_needed pick
     pick
   end
 
@@ -104,10 +104,30 @@ class FakeBritishToponym < String
   end
 
   def double_last_letter_if_needed(pick)
-    # obviously this should be just two things
-    return unless pick.match(/^[aeiou]/)
-    return if @pieces.last.match(/^[aeiou]/)
-    return if @pieces.last[-1] == @pieces.last[-2] # don't triple
+    double_last_letter if doubled_last_letter_needed?(pick)
+  end
+
+  def doubled_last_letter_needed?(pick)
+    return false unless begins_with_vowel?(pick)
+    return false if ends_with_vowel?(@pieces.last)
+    return false if ends_with_doubled_letters?(@pieces.last)
+    true
+  end
+
+  def begins_with_vowel?(word)
+    word.match(/^[aeiou]/)
+  end
+
+  def ends_with_vowel?(word)
+    #word.match(/^[aeiou]/)
+    word.match(/[aeiou]$/)
+  end
+
+  def ends_with_doubled_letters?(word)
+    word[-1] == word[-2]
+  end
+
+  def double_last_letter
     last_piece = @pieces.pop
     @pieces.push last_piece + last_piece[-1]
   end
