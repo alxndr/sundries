@@ -54,19 +54,19 @@ class FakeBritishToponym < String
   end
 
   def add_postfix
-    # this sure sucks
     pick = random_postfix
-    if pick.match(/^-/) # "-on-the-", "-upon-", etc
+    case pick
+    when /^-/ # "-on-the-", "-upon-", etc
       @pieces.push pick
-      @pieces.push self.class.new(modifier: false)
-    elsif pick == 'of'
+      @pieces.push new_decoration_toponym
+    when 'of'
       @pieces.push " #{pick} "
-      @pieces.push self.class.new(modifier: false)
-    elsif pick == "'s"
+      @pieces.push new_decoration_toponym
+    when "'s"
       @pieces.push "#{pick} "
-      @pieces.push self.class.new(modifier: false)
+      @pieces.push new_decoration_toponym
     else
-      @pieces.push ' '+pick.capitalize
+      @pieces.push " #{pick.capitalize}"
     end
   end
 
@@ -90,6 +90,10 @@ class FakeBritishToponym < String
     pick = random_suffix
     double_last_letter_if_needed(pick)
     pick
+  end
+
+  def new_decoration_toponym
+    self.class.new(modifier: false)
   end
 
   %w(ante pre in suf post).each do |which|
