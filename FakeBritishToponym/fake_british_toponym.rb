@@ -14,7 +14,7 @@ class FakeBritishToponym < String
 
     add_prefix
 
-    rand(args[:min_syllables]).times do
+    args[:min_syllables].times do
       add_infix
     end
 
