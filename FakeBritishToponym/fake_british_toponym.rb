@@ -1,3 +1,5 @@
+require 'probability'
+
 class FakeBritishToponym < String
 
   ANTEFIXES = %w( east great little new north old port saint south west )
@@ -18,15 +20,11 @@ class FakeBritishToponym < String
       add_infix
     end
 
-    if @pieces.length == 1 || rand(10) % 3 == 0
-      add_suffix
-    end
+    add_suffix if @pieces.length == 1 || 3.in(10)
 
-    if args[:modifier] && rand(10) % 5 == 0
-      add_decoration
-    end
+    add_decoration if args[:modifier] && 1.in(2)
 
-    @name = @pieces.join.to_s
+    @name = join_pieces
 
     super @name # do some String-y things
   end
@@ -71,7 +69,7 @@ class FakeBritishToponym < String
   end
 
   def add_decoration
-    if rand(2) == 0
+    if 1.in(2)
       add_antefix
     else
       add_postfix
@@ -119,7 +117,6 @@ class FakeBritishToponym < String
   end
 
   def ends_with_vowel?(word)
-    #word.match(/^[aeiou]/)
     word.match(/[aeiou]$/)
   end
 
@@ -130,6 +127,10 @@ class FakeBritishToponym < String
   def double_last_letter
     last_piece = @pieces.pop
     @pieces.push last_piece + last_piece[-1]
+  end
+
+  def join_pieces
+    @pieces.join.to_s
   end
 
 end
