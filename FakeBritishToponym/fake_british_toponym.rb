@@ -96,7 +96,7 @@ class FakeBritishToponym < String
 
   %w(ante pre in suf post).each do |which|
     define_method("random_#{which}fix") do
-      corpus = eval "#{which}fixes".upcase
+      corpus = self.class.const_get("#{which.upcase}FIXES")
       corpus.sample
     end
   end
@@ -106,9 +106,9 @@ class FakeBritishToponym < String
   end
 
   def doubled_last_letter_needed?(pick)
-    return false unless begins_with_vowel?(pick)
-    return false if ends_with_vowel?(@pieces.last)
-    return false if ends_with_doubled_letters?(@pieces.last)
+    return false unless begins_with_vowel? pick
+    return false if ends_with_vowel? @pieces.last
+    return false if ends_with_doubled_letters? @pieces.last
     true
   end
 
