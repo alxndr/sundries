@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/fake_british_toponym'
 
-MANY = 10e3.to_i
+MANY = 10e4.to_i
 
 describe FakeBritishToponym do
 
@@ -43,7 +43,7 @@ describe FakeBritishToponym do
         MANY.times do
           length = rand(10)
           toponym = FakeBritishToponym.new(min_syllables: length)
-          expect(toponym.length).to be >= length * 2
+          expect(toponym.length).to be > length * 2
         end
       end
     end
