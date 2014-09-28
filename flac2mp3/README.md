@@ -1,4 +1,9 @@
-Flac2mp3
+flac2mp3
 ========
 
-** TODO: Add description **
+Converts a directory's worth of `.flac` files into `.mp3` files.
+
+Dependencies (need to be available via the system's `$PATH`):
+
+* `lame`
+* `flac`
