@@ -5,12 +5,14 @@ defmodule Flac2mp3.Mixfile do
     [app: :flac2mp3,
      version: "0.0.1",
      elixir: "~> 1.0.0",
-     deps: deps]
+     deps: deps,
+     escript: escript]
   end
 
-  # Configuration for the OTP application
-  #
-  # Type `mix help compile.app` for more information
+  defp escript do
+    [main_module: Flac2mp3.CLI]
+  end
+
   def application do
     [applications: [:logger]]
   end
