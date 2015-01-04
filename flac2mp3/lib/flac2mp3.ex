@@ -4,9 +4,11 @@ defmodule Flac2mp3 do
 
   def convert_flac(flacfile) do
     IO.puts "starting on #{flacfile}"
+
+    dirname = Path.dirname(flacfile)
     basename = Path.basename(flacfile, ".flac")
-    wavfile = "#{basename}.wav"
-    mp3file = "#{basename}.mp3"
+    wavfile = Path.join(dirname, "#{basename}.wav")
+    mp3file = Path.join(dirname, "#{basename}.mp3")
 
     Task.async(fn ->
       System.cmd("flac", [ "--silent", "--force", "--decode", "--output-name", wavfile, flacfile], stderr_to_stdout: false)
