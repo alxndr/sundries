@@ -20,19 +20,19 @@ defmodule Flac2mp3 do
     end)
     |> Task.await 30_000
 
-    IO.puts "done: #{mp3file}"
     Task.async(fn ->
       System.cmd "rm", [wavfile]
-    end) |>
-    Task.await 1_000
+    end)
+    |> Task.await 1_000
+    IO.puts "done: #{mp3file}"
   end
 
   def convert_dir(dir\\".") do
     check_dependencies
-    Path.expand(dir) |>
-    Path.join("**/*.flac") |>
-    Path.wildcard |>
-    Enum.each(&(convert_flac(&1)))
+    Path.expand(dir)
+    |> Path.join("**/*.flac")
+    |> Path.wildcard
+    |> Enum.each(&(convert_flac(&1)))
   end
 
   defp check_dependencies do
@@ -41,7 +41,6 @@ defmodule Flac2mp3 do
       _ ->
         IO.puts "need flac in $PATH"
         System.halt(1)
-      _ -> true
     end
     case System.cmd("which", ["lame"]) do
       {_, 0} -> true
