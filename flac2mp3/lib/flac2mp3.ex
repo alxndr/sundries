@@ -9,14 +9,14 @@ defmodule Flac2mp3 do
     mp3file = "#{basename}.mp3"
 
     Task.async(fn ->
-      System.cmd("flac", ["-d", "-o", wavfile, flacfile], stderr_to_stdout: true)
-    end) |>
-    Task.await 1_000
+      System.cmd("flac", [ "--silent", "--force", "--decode", "--output-name", wavfile, flacfile], stderr_to_stdout: false)
+    end)
+    |> Task.await 10_000
 
     Task.async(fn ->
-      System.cmd "lame", ["--abr", "320", wavfile, mp3file], stderr_to_stdout: true
-    end) |>
-    Task.await 30_000
+      System.cmd "lame", [ "--silent", "--abr", "320", wavfile, mp3file], stderr_to_stdout: false
+    end)
+    |> Task.await 30_000
 
     IO.puts "done: #{mp3file}"
     Task.async(fn ->
