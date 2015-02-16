@@ -46,4 +46,15 @@ defmodule KV.RegistryTest do
     assert_receive {:exit, "shopping", ^bucket}
   end
 
+  test "removes a bucket on crash", %{r: registry} do
+    KV.Registry.create(registry, "shopping")
+    {:ok, bucket} = KV.Registry.lookup(registry, "shopping")
+
+    # kill bucket
+    Process.exit(bucket, :shutdown)
+    assert_receive {:exit, "shopping", ^bucket}
+
+    # blocks for notification...
+    assert KV.Registry.lookup(registry, "shopping") == :error
+  end
 end
