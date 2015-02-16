@@ -3,9 +3,9 @@ defmodule KV.Registry do
 
   # client API
 
-  def start_link(event_manager, opts\\[]) do
+  def start_link(event_manager, buckets, opts\\[]) do
     # "preferrable to pass the event manager pid/name to start_link, decoupling the start of the event manager from the registry"
-    GenServer.start_link(__MODULE__, event_manager, opts)
+    GenServer.start_link(__MODULE__, {event_manager, buckets}, opts)
     # module where server callbacks are, init param, options
   end
 
@@ -22,11 +22,12 @@ defmodule KV.Registry do
   # server callbacks
   # ...more: http://elixir-lang.org/docs/stable/elixir/GenServer.html
 
-  def init(events) do
+  def init({events, buckets}) do
     names = HashDict.new # name    -> pid
     refs = HashDict.new  # pid ref -> name
     # shown in handle_cast/2's else
-    {:ok, %{names: names, refs: refs, events: events}}
+
+    {:ok, %{names: names, refs: refs, events: events, buckets: buckets}}
   end
 
   def handle_call({:lookup, name}, _from, state) do
@@ -39,9 +40,9 @@ defmodule KV.Registry do
     if HashDict.get(state.names, name) do
       {:noreply, state}
     else
-      {:ok, pid} = KV.Bucket.start_link
+      # start bucket w/its supervisor
+      {:ok, pid} = KV.Bucket.Supervisor.start_bucket(state.buckets)
       ref = Process.monitor(pid)
-      # ^ "registry is both linking and monitoring"
       refs = HashDict.put(state.refs, ref, name)
       names = HashDict.put(state.names, name, pid)
       GenEvent.sync_notify(state.events, {:create, name, pid}) # push notification to server on create
