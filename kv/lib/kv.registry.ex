@@ -25,7 +25,7 @@ defmodule KV.Registry do
   # ...more: http://elixir-lang.org/docs/stable/elixir/GenServer.html
 
   def init({table, events, buckets}) do
-    refs = HashDict.new  # pid ref -> name
+    refs = :ets.foldl(&update_with_monitors/2, HashDict.new, table)
     {:ok, %{names: table, refs: refs, events: events, buckets: buckets}}
   end
 
@@ -53,6 +53,12 @@ defmodule KV.Registry do
 
   def handle_info(_msg, state) do
     {:noreply, state}
+  end
+
+  # ...
+
+  defp update_with_monitors({name, pid}, acc) do
+    HashDict.put(acc, Process.monitor(pid), name)
   end
 
 end

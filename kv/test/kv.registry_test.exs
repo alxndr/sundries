@@ -62,4 +62,26 @@ defmodule KV.RegistryTest do
     assert_receive {:exit, "shopping", ^bucket} # wait for it...
     assert KV.Registry.lookup(ets, "shopping") == :error
   end
+
+  test "monitors existing buckets on startup", %{r: registry, ets: ets} do
+    bucket = KV.Registry.create(registry, "shopping")
+
+    # (unlink then) kill registry process
+    Process.unlink(registry)
+    Process.exit(registry, :shutdown)
+
+    # start new registry using existing ets
+    start_registry(ets)
+
+    # assert that contents are same as before
+    assert KV.Registry.lookup(ets, "shopping") == {:ok, bucket}
+
+    # kill bucket process
+    Process.exit(bucket, :shutdown)
+
+    # ..we should get notification
+    assert_receive {:exit, "shopping", ^bucket}
+    assert KV.Registry.lookup(ets, "shopping") == :error
+  end
+
 end
