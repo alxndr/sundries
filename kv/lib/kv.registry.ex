@@ -25,9 +25,8 @@ defmodule KV.Registry do
   # ...more: http://elixir-lang.org/docs/stable/elixir/GenServer.html
 
   def init({table, events, buckets}) do
-    ets = :ets.new(table, [:named_table, read_concurrency: true])
     refs = HashDict.new  # pid ref -> name
-    {:ok, %{names: ets, refs: refs, events: events, buckets: buckets}}
+    {:ok, %{names: table, refs: refs, events: events, buckets: buckets}}
   end
 
   def handle_call({:create, name}, _from, state) do

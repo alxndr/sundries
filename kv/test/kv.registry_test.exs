@@ -12,13 +12,18 @@ defmodule KV.RegistryTest do
   end
 
   setup do
+    ets = :ets.new(:registry_table, [:set, :public])
+    registry = start_registry(ets)
+    {:ok, r: registry, ets: ets}
+  end
+
+  defp start_registry(ets) do
     {:ok, sup} = KV.Bucket.Supervisor.start_link
     {:ok, manager} = GenEvent.start_link
-    {:ok, registry} = KV.Registry.start_link(:registry_table, manager, sup)
+    {:ok, registry} = KV.Registry.start_link(ets, manager, sup)
 
     GenEvent.add_mon_handler(manager, Forwarder, self())
-
-    {:ok, r: registry, ets: :registry_table}
+    registry
   end
 
   test "spawns buckets", %{r: registry, ets: ets} do
