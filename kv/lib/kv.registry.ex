@@ -3,8 +3,9 @@ defmodule KV.Registry do
 
   # client API
 
-  def start_link(opts\\[]) do
-    GenServer.start_link(__MODULE__, :ok, opts)
+  def start_link(event_manager, opts\\[]) do
+    # "preferrable to pass the event manager pid/name to start_link, decoupling the start of the event manager from the registry"
+    GenServer.start_link(__MODULE__, event_manager, opts)
     # module where server callbacks are, init param, options
   end
 
@@ -21,41 +22,40 @@ defmodule KV.Registry do
   # server callbacks
   # ...more: http://elixir-lang.org/docs/stable/elixir/GenServer.html
 
-  def init(:ok) do
+  def init(events) do
     names = HashDict.new # name    -> pid
     refs = HashDict.new  # pid ref -> name
     # shown in handle_cast/2's else
-    {:ok, {names, refs}}
+    {:ok, %{names: names, refs: refs, events: events}}
   end
 
-  def handle_call({:lookup, name}, _from, {names, _} = state) do
+  def handle_call({:lookup, name}, _from, state) do
     # synchronous requests
-    {:reply, HashDict.fetch(names, name), state}
+    {:reply, HashDict.fetch(state.names, name), state}
   end
 
-  def handle_call(:stop, _from, state) do
-    {:stop, :normal, :ok, state}
-  end
-
-  def handle_cast({:create, name}, {names, refs}) do
+  def handle_cast({:create, name}, state) do
     # asynchronous requests; "create/2 should have used call/2"
-    if HashDict.has_key?(names, name) do
-      {:noreply, {names, refs}}
+    if HashDict.get(state.names, name) do
+      {:noreply, state}
     else
       {:ok, pid} = KV.Bucket.start_link
       ref = Process.monitor(pid)
-      refs = HashDict.put(refs, ref, name)
-      names = HashDict.put(names, name, pid)
-      {:noreply, {names, refs}}
+      # ^ "registry is both linking and monitoring"
+      refs = HashDict.put(state.refs, ref, name)
+      names = HashDict.put(state.names, name, pid)
+      GenEvent.sync_notify(state.events, {:create, name, pid}) # push notification to server on create
+      {:noreply, %{state | names: names, refs: refs}}
     end
   end
 
-  def handle_info({:DOWN, ref, :process, _pid, _reason}, {names, refs}) do
+  def handle_info({:DOWN, ref, :process, pid, _reason}, state) do
     # all other messages
     # (e.g. stopped)
-    {name, refs} = HashDict.pop(refs, ref)
-    names = HashDict.delete(names, name)
-    {:noreply, {names, refs}}
+    {name, refs} = HashDict.pop(state.refs, ref)
+    names = HashDict.delete(state.names, name)
+    GenEvent.sync_notify(state.events, {:exit, name, pid}) # push notification to server on exit
+    {:noreply, %{state | names: names, refs: refs}}
   end
 
   def handle_info(_msg, state) do
