@@ -69,3 +69,19 @@ String.prototype.repeat = function(count) {
   }
   return result;
 };
+
+
+function interleaveArrays(array1, array2) {
+  return array1.reduce((newArray, array1element, array1index) => newArray.concat(array1element, array2[array1index]), []);
+}
+
+const REGEX_SURROUNDING_WHITESPACE = /^\s+|\s*\n/gm;
+
+function trimWhitespaceIncludingNewline(string) {
+  return string.replace(REGEX_SURROUNDING_WHITESPACE, "");
+}
+
+function trimHtmlWhitespace(arrayOfStrings, ...vars) {
+  // for tagged literals
+  return interleaveArrays(arrayOfStrings.map(trimWhitespaceIncludingNewline), vars).join("");
+}
